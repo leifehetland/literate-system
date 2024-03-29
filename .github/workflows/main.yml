@@ -1,28 +1,22 @@
-# Name of workflow
-name: Lint workflow
-# Trigger workflow on all pull requests
-'on':
-  pull_request:
+# .github/workflows/main.yml
+on:
+  push:
     branches:
-      - dev
       - main
-# Jobs to carry out
 jobs:
-  test:
-    # Operating system to run job on
+  ci:
     runs-on: ubuntu-latest
-    # Steps in job
     steps:
-      # Get code from repo
-      - name: Checkout code
-        uses: actions/checkout@v4
-      # Install NodeJS
-      - name: Use Node.js 20.x
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-      # Build the app
-      - name: 🧰 install deps
-        run: npm install
-      - name: Run lint
-        run: npm run lint
+      - uses: actions/checkout@v3
+      - name: Test
+        run: |
+          npm install
+          npm run test
+      - name: Deploy
+        # Only run this step if the branch is main
+        if: github.ref == 'refs/heads/main'
+        env:
+          deploy_url: '${{ secrets.RENDER_DEPLOY_HOOK_URL }}'
+        run: |
+          curl "$deploy_url"
+  
